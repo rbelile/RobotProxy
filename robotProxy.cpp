@@ -67,7 +67,40 @@ void UdpServer(char *port){
     	else if (numBytesSent != numBytesRcvd)
       		DieWithError("sendto() sent unexpected number of bytes");
   }
+}
 
+void TcpClient(string Server, int robotID, int robotNum, char* port){
+    int sock;                        /* Socket descriptor */
+    struct sockaddr_in ServAddr; /*  server address */
+    string Buffer;       
+    //unsigned int StringLen;      /* Length of string to  */
+    //int bytesRcvd, totalBytesRcvd;   /* Bytes read in single recv() 
+    //and total bytes read */
+    struct hostent *host;
+
+    /* Create a reliable, stream socket using TCP */
+    if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+        DieWithError("socket() failed");
+
+    /* Construct the server address structure */
+    memset(&ServAddr, 0, sizeof(ServAddr));     /* Zero out structure */
+    ServAddr.sin_family      = AF_INET;             /* Internet address family */
+    ServAddr.sin_addr.s_addr = inet_addr(Server.c_str();   /* Server IP address */
+    ServAddr.sin_port        = htons(ServPort); /* Server port */
+
+
+    if(ServAddr.sin_addr.s_addr == -1)
+    {
+        host = gethostbyname(Server.c_str());
+            ServAddr.sin_addr.s_addr = *((unsigned long *) host->h_addr_list[0]);
+    }
+
+    /* Establish the connection to the  server */
+    if (connect(sock, (struct sockaddr *) &ServAddr, sizeof(ServAddr)) < 0)
+        DieWithError("connect() failed");
+    
+    close(sock);
+    exit(0);
 }
 
 int main(int argc, char *argv[]) {
