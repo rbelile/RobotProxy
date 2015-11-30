@@ -18,8 +18,6 @@ void DieWithError(string errorMessage){ // Error handling function
 }
 
 void UdpServer(char *port){
-
-	
 	// Construct the server address structure
   	struct addrinfo addrCriteria;                   // Criteria for address
   	memset(&addrCriteria, 0, sizeof(addrCriteria)); // Zero out structure
@@ -51,23 +49,24 @@ void UdpServer(char *port){
     	socklen_t clntAddrLen = sizeof(clntAddr);
 
     	// Block until receive message from a client
-    	 char buffer[MAXSTRINGLENGTH]; // I/O buffer
+    	char buffer[MAXSTRINGLENGTH]; // I/O buffer
     	// Size of received message
     	ssize_t numBytesRcvd = recvfrom(sock, buffer, MAXSTRINGLENGTH, 0,
         	(struct sockaddr *) &clntAddr, &clntAddrLen);
     	if (numBytesRcvd < 0)
       		DieWithError("recvfrom() failed");
 
+        cout << "here";
+
     	// Send received datagram back to the client
     	ssize_t numBytesSent = sendto(sock, buffer, numBytesRcvd, 0,
         	(struct sockaddr *) &clntAddr, sizeof(clntAddr));
 
     	if (numBytesSent < 0)
-      		DieWithError("sendto() failed)");
+      		DieWithError("sendto() failed");
     	else if (numBytesSent != numBytesRcvd)
       		DieWithError("sendto() sent unexpected number of bytes");
-  }
-
+    }
 }
 
 int main(int argc, char *argv[]) {

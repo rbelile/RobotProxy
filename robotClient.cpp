@@ -20,11 +20,9 @@ void DieWithError(string errorMessage){ // Error handling function
 
 
 void UdpClient(string server, char* servPort){
-
-  	
   	string echoString;
-  	cout << "Please enter an echo message: " << endl;
-  	getline(cin, echoString);
+  	//cout << "Please enter an echo message: " << endl;
+  	//getline(cin, echoString);
 
   	size_t echoStringLen = echoString.length();
   	if (echoStringLen > 300) // Check input length
@@ -82,16 +80,15 @@ void UdpClient(string server, char* servPort){
   	exit(0);
 }
 
-
 int main(int argc, char *argv[]) {
-	string serverName;
-	in_port_t serverPort;
+  string serverName;
+  in_port_t serverPort;
 	char *UdpClientPort;
 	int lenOfSides, numOfSides;
 
 	if (argc != 9) {
 		cout << "Usage: " << argv[0] << " -h <hostname-of-server> -p <port> " <<
-			"-n <number-of-sides> -l <length-of-sides>" << endl;
+      "-n <number-of-sides> -l <length-of-sides>" << endl;
 		exit(1);
 	}
 
