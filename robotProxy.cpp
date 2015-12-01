@@ -190,13 +190,16 @@ void UdpServer(char *port){
 
 string TcpClient(string Server, int robotID, int robotNum, string command, int requestData){
 
-    string port;
+    
     string tempCommand = checkCommand(command);
 
     if(tempCommand == "Bad") return "Error0";
     else if(tempCommand == "Bad1") return "Error1";
     else if(tempCommand == "Bad2") return "Error2";
-    else port = tempCommand.c_str();
+    
+    char* port;
+    strcpy (port, tempCommand.c_str());
+    
     
     string payload;
     int sock;                        /* Socket descriptor */
