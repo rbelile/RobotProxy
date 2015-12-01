@@ -16,6 +16,7 @@ using namespace std;
 
 int generatePassword();
 string getcommand(int check);
+string TcpClient(string Server, int robotID, int robotNum, string command, int requestData);
 
  string hostName;
  int robotID, robotNum;
@@ -33,34 +34,34 @@ string getCommand(int check){
     {
       return "Connect";
     }
-    else if(Check == 2){
-      return "Image"
+    else if(check == 2){
+      return "Image";
     }
-    else if(Check == 4){
+    else if(check == 4){
       return "GPS";
     }
-    else if(Check == 8){
+    else if(check == 8){
       return "dGPS";
     }
-    else if(Check == 16){
+    else if(check == 16){
       return "Lasers"; 
     }
-    else if(Check == 32){
+    else if(check == 32){
       return "Move";
     }
-    else if(Check == 64){
+    else if(check == 64){
       return "Turn";
     }
-    else if(Check == 128){
+    else if(check == 128){
       return "Stop";
     }
-    else if(Check == 255){
+    else if(check == 255){
       return "Quit";
     }
-    else if(Check == 256){
+    else if(check == 256){
       return "Error with Client Request";
     }
-    else if(Check == 512){
+    else if(check == 512){
       return "Error from Robot";
     }
     else return "Command not recognized";
@@ -77,6 +78,17 @@ string checkCommand(string command){
   else if(command == "Error From Client Request") return "Bad1";
   else if(command == "Error from Robot") return "Bad2";
   else return "Bad";
+}
+
+int commandNum(string command){
+  if(command == "Image") return 1;
+  else if(command == "GPS") return 2;
+  else if(command == "dGPS") return 3;
+  else if(command == "Lasers") return 4;
+  else if(command == "Move") return 5;
+  else if(command == "Turn") return 6;
+  else if(command == "Stop") return 7;
+  else return 0;
 }
 
 void UdpServer(char *port){
@@ -162,12 +174,12 @@ void UdpServer(char *port){
       
       }
       
-      ssize_t numBytesRcvd = recvfrom(sock, buffer, MAXSTRINGLENGTH, 0,
+      numBytesRcvd = recvfrom(sock, buffer, MAXSTRINGLENGTH, 0,
           (struct sockaddr *) &clntAddr, &clntAddrLen);
       if (numBytesRcvd < 0)
           DieWithError("recvfrom() failed");
       
-      ssize_t numBytesSent = sendto(sock, buffer, numBytesRcvd, 0, 
+      numBytesSent = sendto(sock, buffer, numBytesRcvd, 0, 
       (struct sockaddr *) &clntAddr, sizeof(clntAddr));
 
 	  close(sock);
@@ -178,12 +190,13 @@ void UdpServer(char *port){
 
 string TcpClient(string Server, int robotID, int robotNum, string command, int requestData){
 
-    char* port;
+    string port;
+    string tempCommand = checkCommand(command);
 
-    if(checkCommand(command) == "Bad") return "Error0";
-    else if(checkCommand == "Bad1") return "Error1";
-    else if(checkCommand == "Bad2") return "Error2";
-    else port = checkCommand(command).c_str();
+    if(tempCommand == "Bad") return "Error0";
+    else if(tempCommand == "Bad1") return "Error1";
+    else if(tempCommand == "Bad2") return "Error2";
+    else port = tempCommand.c_str();
     
     string payload;
     int sock;                        /* Socket descriptor */
@@ -215,29 +228,29 @@ string TcpClient(string Server, int robotID, int robotNum, string command, int r
     if (connect(sock, (struct sockaddr *) &ServAddr, sizeof(ServAddr)) < 0)
         DieWithError("connect() failed");
         
-    string HTTPreq = "http://" + hostname + ":";    
-	switch(command){
-		case 2:
+    string HTTPreq = "http://" + hostName + ":";    
+	switch(commandNum(command)){
+		case 1:
 			HTTPreq += "8081/snapshot?topic=/robot9/image?width=600?height=500";
 			break;
-		case 4:
+		case 2:
 			HTTPreq += "8082/state?id=5senior";
 			break;
-		case 8:
+		case 3:
 			HTTPreq += "8084/state?id=5senior";
 			break;
-		case 16:
+		case 4:
 			HTTPreq += "8083/state?id=5senior";
 			break;
-		case 32:
+		case 5:
 			HTTPreq += "8082/twist?id=5senior&lx=";
 			HTTPreq += requestData;
 			break;
-		case 64:
+		case 6:
 			HTTPreq += "8082/twist?id=5senior&az=";
 			HTTPreq += requestData;
 			break;
-		case 128:
+		case 7:
 			HTTPreq += "8082/twist?id=5senior&lx=0";
 			break;
 	}
