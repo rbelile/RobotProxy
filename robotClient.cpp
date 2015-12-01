@@ -90,6 +90,12 @@ int main(int argc, char *argv[]) {
   	if (sock < 0)
     	DieWithError("socket() failed");
 
+	cout << "Headers: ";
+	for(int i = 0; i < 7; i++) {
+		cout << udpHeaders[i] << " ";
+	}
+	cout << endl;
+
   	// Send the string to the server
   	ssize_t numBytes = sendto(sock, udpHeaders, sizeof(udpHeaders), 0,
       	servAddr->ai_addr, servAddr->ai_addrlen);
@@ -99,9 +105,7 @@ int main(int argc, char *argv[]) {
     	DieWithError("sendto() error, sent unexpected number of bytes");
 
   	// Receive a response
-
   	struct sockaddr_storage fromAddr; // Source address of server
-  	// Set length of from address structure (in-out parameter)
   	socklen_t fromAddrLen = sizeof(fromAddr);
 
   	int buffer[7]; // I/O buffer

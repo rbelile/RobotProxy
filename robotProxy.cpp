@@ -118,19 +118,19 @@ void UdpServer(char *port){
     // Free address list allocated by getaddrinfo()
     freeaddrinfo(servAddr);
     for (;;) { // Run forever
-      struct sockaddr_storage clntAddr; // Client address
-
-      // Set Length of client address structure (in-out parameter)
+      struct sockaddr_storage clntAddr;
       socklen_t clntAddrLen = sizeof(clntAddr);
 
       // Block until receive message from a client
-      int buffer[7]; // I/O buffer
+      int buffer[50]; // I/O buffer
 
       // Size of received message
-      ssize_t numBytesRcvd = recvfrom(sock, buffer, MAXSTRINGLENGTH, 0,
+      int numBytesRcvd = recvfrom(sock, buffer, 10000, 0,
           (struct sockaddr *) &clntAddr, &clntAddrLen);
-      if (numBytesRcvd < 0)
-          DieWithError("recvfrom() failed");
+      if (numBytesRcvd < 0) {
+			 //cout << "Error: " << GetLastError();
+          DieWithError("recvfrom() failed 1");
+		}
 
       buffer[1] = generatePassword();
       int password = buffer[1];
@@ -149,7 +149,7 @@ void UdpServer(char *port){
           ssize_t numBytesRcvd = recvfrom(sock, buffer, MAXSTRINGLENGTH, 0,
             (struct sockaddr *) &clntAddr, &clntAddrLen);
           if (numBytesRcvd < 0)
-              DieWithError("recvfrom() failed");
+              DieWithError("recvfrom() failed 2");
           if(buffer[1] != password){
             break;
           }
@@ -177,7 +177,7 @@ void UdpServer(char *port){
       numBytesRcvd = recvfrom(sock, buffer, MAXSTRINGLENGTH, 0,
           (struct sockaddr *) &clntAddr, &clntAddrLen);
       if (numBytesRcvd < 0)
-          DieWithError("recvfrom() failed");
+          DieWithError("recvfrom() failed 3");
       
       numBytesSent = sendto(sock, buffer, numBytesRcvd, 0, 
       (struct sockaddr *) &clntAddr, sizeof(clntAddr));
@@ -231,7 +231,7 @@ string TcpClient(string Server, int robotID, int robotNum, string command, int r
     string HTTPreq = "http://" + hostName + ":";    
 	switch(commandNum(command)){
 		case 1:
-			HTTPreq += "8081/snapshot?topic=/robot9/image?width=600?height=500";
+			HTTPreq += "8081/snapshot?topic=/robot_10/image?width=600?height=500";
 			break;
 		case 2:
 			HTTPreq += "8082/state?id=5senior";
@@ -254,9 +254,27 @@ string TcpClient(string Server, int robotID, int robotNum, string command, int r
 			HTTPreq += "8082/twist?id=5senior&lx=0";
 			break;
 	}
-    
-    close(sock);
-    exit(0);
+
+	string httpGet = "GET " + HTTPreq + " HTTP/1.1";
+	string httpHost = "Host: " + hostName + "\r\n\r\n";
+	string entireHTTP = httpGet + httpHost;
+
+	if (connect(sock, (struct sockaddr *)&ServAddr, sizeof(ServAddr)) < 0)
+		DieWithError("connect() to robot failed");
+
+	if (send(sock, entireHTTP.c_str(), entireHTTP.size(), 0) != entireHTTP.size())
+		DieWithError("send() to robot failed");
+
+	char buffer[3000];
+	string toSend;
+	for(;;) {
+		if (recv(sock, buffer, sizeof(buffer), 0) < 0)
+			break;
+		toSend += buffer;
+	}
+	
+   close(sock);
+	return toSend;
 }
 
 int generatePassword() {
