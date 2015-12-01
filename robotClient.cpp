@@ -319,6 +319,7 @@ repeat:
 			DieWithError("Server did not acknowledge stop request.");
 		}
 	}
+
 	// Image
 	udpHeaders[2] = 2;
 	numBytes = sendto(sock, udpHeaders, sizeof(udpHeaders), 0,
@@ -437,14 +438,7 @@ repeat:
 	for(int j = 28; j < 300; j++) {
 		laserFile << fullBuffer[j];
 	}
-
-	for(int j = 2; j <= numOfDatagrams; j++) {
-		numBytesRcvd = recvfrom(sock, fullBuffer, MAXDATAGRAM, 0,
-	   	(struct sockaddr *) &fromAddr, &fromAddrLen);
-		for(int j = 28; j < 300; j++) {
-			laserFile << fullBuffer[j];
-		}
-	}
+	
 	laserFile.close();
 
 	if (!isOnSecond) {
