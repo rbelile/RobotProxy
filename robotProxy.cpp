@@ -8,9 +8,13 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <time.h>
 
 #define MAXSTRINGLENGTH 300
 using namespace std;
+
+int generatePassword();
 
 void DieWithError(string errorMessage){ // Error handling function
     fprintf(stdout, "%s\n", errorMessage.c_str());
@@ -18,8 +22,6 @@ void DieWithError(string errorMessage){ // Error handling function
 }
 
 void UdpServer(char *port){
-
-	
 	// Construct the server address structure
   	struct addrinfo addrCriteria;                   // Criteria for address
   	memset(&addrCriteria, 0, sizeof(addrCriteria)); // Zero out structure
@@ -47,26 +49,37 @@ void UdpServer(char *port){
   	freeaddrinfo(servAddr);
   	for (;;) { // Run forever
     	struct sockaddr_storage clntAddr; // Client address
+
     	// Set Length of client address structure (in-out parameter)
     	socklen_t clntAddrLen = sizeof(clntAddr);
 
     	// Block until receive message from a client
-    	 char buffer[MAXSTRINGLENGTH]; // I/O buffer
+    	int buffer[7]; // I/O buffer
+
     	// Size of received message
     	ssize_t numBytesRcvd = recvfrom(sock, buffer, MAXSTRINGLENGTH, 0,
         	(struct sockaddr *) &clntAddr, &clntAddrLen);
     	if (numBytesRcvd < 0)
       		DieWithError("recvfrom() failed");
 
+		buffer[1] = generatePassword();
+		int password = buffer[1];
+
+		//cout << "Password: " << buffer[1] << endl;
+
     	// Send received datagram back to the client
-    	ssize_t numBytesSent = sendto(sock, buffer, numBytesRcvd, 0,
-        	(struct sockaddr *) &clntAddr, sizeof(clntAddr));
+    	ssize_t numBytesSent = sendto(sock, buffer, numBytesRcvd, 0, 
+			(struct sockaddr *) &clntAddr, sizeof(clntAddr));
 
     	if (numBytesSent < 0)
-      		DieWithError("sendto() failed)");
-    	else if (numBytesSent != numBytesRcvd)
-      		DieWithError("sendto() sent unexpected number of bytes");
-  }
+      		DieWithError("sendto() failed");
+
+		for (;;) {
+			
+		}
+    	//else if (numBytesSent != numBytesRcvd)
+      	//	DieWithError("sendto() sent unexpected number of bytes");
+    }
 }
 
 void TcpClient(string Server, int robotID, int robotNum, char* port){
@@ -85,8 +98,8 @@ void TcpClient(string Server, int robotID, int robotNum, char* port){
     /* Construct the server address structure */
     memset(&ServAddr, 0, sizeof(ServAddr));     /* Zero out structure */
     ServAddr.sin_family      = AF_INET;             /* Internet address family */
-    ServAddr.sin_addr.s_addr = inet_addr(Server.c_str();   /* Server IP address */
-    ServAddr.sin_port        = htons(ServPort); /* Server port */
+    ServAddr.sin_addr.s_addr = inet_addr(Server.c_str());   // Server IP address
+    //ServAddr.sin_port        = htons(port); /* Server port */
 
 
     if(ServAddr.sin_addr.s_addr == -1)
@@ -103,15 +116,21 @@ void TcpClient(string Server, int robotID, int robotNum, char* port){
     exit(0);
 }
 
+int generatePassword() {
+	return rand() % 20000000;
+}
+
 int main(int argc, char *argv[]) {
 	string hostName;
 	int robotID, robotNum;
 	in_port_t port;
 	char* UdpServerPort;
 
+	srand(time(NULL));
+
 	if (argc != 9) {
-		cout << "Usage: " << argv[0] << " -h <hostname-of-robot> -i <robot-id> -n " <<
-			"<robot-number> -p <port>" << endl;
+		cout << "Usage: " << argv[0] << " -h <hostname-of-robot> -i <robot-id> -n " 
+			<< "<robot-number> -p <port>" << endl;
 		exit(1);
 	}
 
